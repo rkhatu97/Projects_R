@@ -1,71 +1,60 @@
-###############################
-### Google Analytics - ui.R ###
-###############################
+library(shiny)
+library(shinyWidgets)
+library(ggplot2)
+library(shinydashboard)
 
-library(shiny) 
-
-fluidPage(
-  headerPanel("Google Analytics Example for Week 5"), 
-  sidebarLayout( 
-    
+shinyUI(fluidPage(
+  dashboardHeader(title = span("Housing Data", 
+                               style = "color: white; font-size: 40px")),
   
-  sidebarPanel( 
-    
-    dateRangeInput(inputId = "dateRange",  
-                   label = "Date range", 
-                   start = "2013-04-01",
-                   end = "2014-04-01"
+  setBackgroundColor(color = "grey",
+                     gradient = c("linear","radial"),
+                     shinydashboard = FALSE),
+  sidebarLayout(
+    sidebarPanel(
+      tags$style(".well {background-color:[black];}"),
+      fileInput("file1", "Choose CSV File",
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values,text/plain",
+                  ".csv")
+      ),
+      selectInput(
+        inputId = "sale",
+        label = "Year Sold",
+        c("2006", "2007", "2008", "2009", "2010")
+      ),
+      
+      selectInput(
+        inputId = "var_1", 
+        label = "Housing Data per Year", 
+        choices = "MSZoning", selected = "MSZoning"),
+      
+      radioButtons(
+        inputId = "color", 
+        label = "Color Of Plot", 
+        list("Dark Grey", "Black", "Steel Blue")),
+      
+      sliderInput(
+        inputId = "bin", 
+        label = "Y limit", min = 0, 
+        max = 1000000,
+        value = 15, 
+        step = 5),
+      
+      sliderInput(
+        inputId = "bin_x", 
+        label = "X limit", min = 1, 
+        max = 1000,
+        value = c(1,2), 
+        step = 1)
+      
     ),
-    hr(),
-    
-    sliderInput(inputId = "minimumTime",
-                label = "Hours of interest- minimum",
-                min = 0,
-                max = 23,
-                value = 0,
-                step = 1),
-    hr(),
-    
-    sliderInput(inputId = "maximumTime",
-                label = "Hours of interest- maximum",
-                min = 0,
-                max = 23,
-                value = 23,
-                step = 1),
-    hr(),
-    
-    checkboxInput(inputId = "smoother",
-                  label = "Add smoother?",
-                  value = FALSE),
-    hr(),
-    
-    checkboxGroupInput(inputId = "domainShow",
-                       label = "Show NHS and other domain (defaults to all)?",
-                       choices = list("NHS users" = "NHS",
-                                      "Other" = "Other")
-                       ),
-    hr(),
-    
-    radioButtons(inputId = "outputType",
-                 label = "Output required",
-                 choices = list("Visitors" = "visitors",
-                                "Bounce rate" = "bounceRate",
-                                "Time on site" = "timeOnSite")),
-    hr(),
-    
-    selectInput(inputId = "network"
-                , label = "Choose domain"
-                , choices = analytics[,"networkdomain"]
-                ),
-    hr()
-    
-  ),
-  mainPanel(
-    tabsetPanel( 
-      tabPanel("Summary", textOutput("textDisplay")), 
-      tabPanel("Monthly figures", plotOutput("monthGraph")),
-      tabPanel("Hourly figures", plotOutput("hourGraph")),
-      tabPanel("Random table",tableOutput("outTable"))
+    mainPanel(
+      
+      plotOutput("plot")
     )
+    
   )
-))
+)
+)
