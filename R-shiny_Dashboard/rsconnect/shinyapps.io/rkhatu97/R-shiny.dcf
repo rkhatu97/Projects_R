@@ -1,0 +1,12 @@
+name: R-shiny
+title:
+username:
+account: rkhatu97
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3429344
+bundleId: 4028876
+url: https://rkhatu97.shinyapps.io/R-shiny/
+when: 1608929975.33009
+asMultiple: FALSE
+asStatic: FALSE
