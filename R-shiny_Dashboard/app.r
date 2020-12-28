@@ -8,17 +8,10 @@ year_2007 <- as.data.frame(housing[which(housing$YrSold==2007),])
 year_2008 <- as.data.frame(housing[which(housing$YrSold==2008),])
 year_2009 <- as.data.frame(housing[which(housing$YrSold==2009),])
 year_2010 <- as.data.frame(housing[which(housing$YrSold==2010),])
-
-ui <- fluidPage(
-  dashboardHeader(title = span("Housing Data Analysis", 
-                               style = "color: white; font-size: 40px")),
-  
-  setBackgroundColor(color = "grey",
-                     gradient = c("linear","radial"),
-                     shinydashboard = FALSE),
-  sidebarLayout(
-    sidebarPanel(
-      tags$style(".well {background-color:[black];}"),
+ui <- dashboardPage(
+  dashboardHeader(title = "Housing Data Analysis", titleWidth = 250),
+  dashboardSidebar(
+    sidebarMenu(
       selectInput(
         inputId = "sale",
         label = "Year Sold",
@@ -48,32 +41,49 @@ ui <- fluidPage(
         value = c(1,2), 
         step = 1)
       
-    ),
-    mainPanel(
-      
-      plotOutput("plot")
     )
+  ),
+  dashboardBody(
     
+    fluidRow(
+      box(title = "Housing Sales Price", width = 12, valueBoxOutput("approvalBox", width = 6))
+    ),
+    fluidRow(
+      box(title = "Plot", width = 12, plotOutput("plot"))
+    )
   )
 )
 
-server <- function(input, output){
-    output$plot <- renderPlot({
-      colm <- input$var_1
-      k <- eval(as.name(paste("year",input$sale, sep = "_")))
-      c <- table(k[,colm])
-      c <- as.data.frame(c)
-      ggplot(c, aes(x = Var1, y = Freq)) + 
-        geom_bar(fill = input$color, color = "grey30", width = 1, stat = "identity") +
-        xlab(input$var_1) +
-        ylab("Count") +
-        ylim(c(0, max(input$bin))) +
-        coord_cartesian(xlim = c(min(input$bin_x), max(input$bin_x))) +
-        geom_text(aes(x = Var1, y = Freq, label = Freq), vjust=-1) +
-        ggtitle("Housing Data",
-                subtitle = input$var_1)
-      
-      
-    })
-  }
-shinyApp(ui = ui, server = server)
+server <- function(input, output) {
+  output$approvalBox <- renderValueBox({
+    colm <- input$var_1
+    k <- eval(as.name(paste("year",input$sale, sep = "_")))
+    c <- sum(k$SalePrice)
+    c <- paste('$',formatC(c, big.mark=',', format = 'f'))
+    c <- unlist(strsplit(c, split='.', fixed=TRUE))[1]
+    valueBox(c, paste("Sale value in Year",input$sale), icon = icon("dollar"),
+             color = "yellow", width = 120
+    )
+  })
+  
+  output$plot <- renderPlot({
+    colm <- input$var_1
+    k <- eval(as.name(paste("year",input$sale, sep = "_")))
+    c <- table(k[,colm])
+    c <- as.data.frame(c)
+    ggplot(c, aes(x = Var1, y = Freq)) + 
+      geom_bar(fill = input$color, color = "grey30", width = 1, stat = "identity") +
+      xlab(input$var_1) +
+      ylab("Count") +
+      ylim(c(0, max(input$bin))) +
+      coord_cartesian(xlim = c(min(input$bin_x), max(input$bin_x))) +
+      geom_text(aes(x = Var1, y = Freq, label = Freq), vjust=-1) +
+      ggtitle("Housing Data",
+              subtitle = input$var_1)
+    
+    
+  })
+}
+
+shinyApp(ui, server)
+
